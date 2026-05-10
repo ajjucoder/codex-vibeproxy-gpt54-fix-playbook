@@ -31,6 +31,13 @@ Only advertise these two Cursor models:
 - `kimi-k2.6-cloud`
 - `glm-5.1-cloud`
 
+Do not advertise the raw upstream IDs:
+
+- `kimi-k2.6:cloud`
+- `glm-5.1:cloud`
+
+If an old Cursor chat calls a raw upstream ID directly, the shim should still apply the same compatibility behavior as the safe alias.
+
 Both should run with thinking on:
 
 ```json
@@ -243,12 +250,14 @@ Repeat with:
 Check these before blaming the model:
 
 1. `/v1/models` advertises only one Kimi model and one GLM model.
-2. `factory_responses_compat.py` still maps Kimi and GLM aliases to the Ollama Cloud model IDs.
-3. `reasoning.effort` is still `high`, not `none`.
-4. The shim still bumps output tokens to at least `1024`.
-5. Streaming chunks with `reasoning` are still copied to `reasoning_content`.
-6. Cursor was fully restarted after model-list changes.
-7. Direct calls to `127.0.0.1:8329` fail even with a 1024 token budget.
+2. Raw IDs like `kimi-k2.6:cloud` and `glm-5.1:cloud` are hidden from `/v1/models`.
+3. `factory_responses_compat.py` still maps Kimi and GLM aliases to the Ollama Cloud model IDs.
+4. Direct raw-ID calls still receive the same high-reasoning compatibility handling.
+5. `reasoning.effort` is still `high`, not `none`.
+6. The shim still bumps output tokens to at least `1024`.
+7. Streaming chunks with `reasoning` are still copied to `reasoning_content`.
+8. Cursor was fully restarted after model-list changes.
+9. Direct calls to `127.0.0.1:8329` fail even with a 1024 token budget.
 
 Only after those checks fail should this be treated as a real upstream model/provider problem.
 
